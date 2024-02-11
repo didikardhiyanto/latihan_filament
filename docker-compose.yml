@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  database:
+    image: mariadb:11.0.3-jammy
+    container_name: mariadb-11.0.3
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: v3DWClsbQlqgMBa
+      MYSQL_DATABASE: db_umkm
+      MYSQL_USER: umkm
+      MYSQL_PASSWORD: rsZVPraF1Uw22s0
+      TZ: Asia/Jakarta
+    volumes:
+      - ppid:/var/lib/mysql
+    ports:
+      - "3311:3306"
+    networks:
+    - umkm_network
+
+  web-umkm:
+    image: laravel-umkm:v1
+    build: .
+    restart: always
+    container_name: laravel-umkm
+    volumes:
+      - ./storage:/var/www/html/storage
+    ports:
+    - "8180:80"
+    depends_on:
+    - "database"
+    networks:
+    - umkm_network
+
+volumes:
+    ppid:
+
+networks:
+  umkm_network:
+    driver: "bridge"

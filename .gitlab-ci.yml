@@ -1,0 +1,26 @@
+stages:
+  - deploy
+
+deploy-dev:
+  stage: deploy
+  variables:
+    TARGET_IP: ${DEV_TARGET_IP}
+    TARGET_PORT: ${DEV_TARGET_PORT}
+    TARGET_USER: ${DEV_TARGET_USER}
+  image: alpine:latest
+  before_script:
+    - apk update
+    - apk add openssh
+    - eval $(ssh-agent -s)
+    - echo "${DEPLOYER_KEY}" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - chmod 600 ~/.ssh/config
+  script:
+    - echo "${DEV_DIR_WEBAPP}"
+    - ssh -p${TARGET_PORT} ${TARGET_USER}@${TARGET_IP} "cd ${DEV_DIR_WEBAPP} && pwd && git pull origin devel"
+  only:
+    - devel
+  tags:
+    - shared-runner
